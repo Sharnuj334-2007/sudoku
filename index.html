@@ -1,214 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Sudoku App</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-* {
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
-
-body {
-  margin: 0;
-  background: radial-gradient(circle at top, #222, #000);
-  color: white;
-  text-align: center;
-}
-
-h1 {
-  margin: 20px 0;
-}
-
-.controls {
-  margin-bottom: 10px;
-}
-
-select, button {
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: none;
-  margin: 5px;
-}
-
-button {
-  background: #4CAF50;
-  color: white;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #43a047;
-}
-
-#timer {
-  margin: 10px;
-  font-weight: bold;
-}
-
-#sudoku {
-  width: 360px;
-  height: 360px;
-  margin: 15px auto;
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(9, 1fr);
-  border: 3px solid white;
-}
-
-.cell {
-  border: 1px solid #555;
-  background: #222;
-  color: white;
-  font-size: 20px;
-  text-align: center;
-  line-height: 40px;
-  cursor: pointer;
-}
-
-.cell input {
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  border: none;
-  color: #00e5ff;
-  font-size: 20px;
-  text-align: center;
-}
-
-.cell input:focus {
-  outline: none;
-  background: #333;
-}
-
-.fixed {
-  color: white;
-  font-weight: bold;
-  cursor: default;
-}
-
-.cell:nth-child(3n) {
-  border-right: 2px solid white;
-}
-
-.cell:nth-child(n+19):nth-child(-n+27),
-.cell:nth-child(n+46):nth-child(-n+54) {
-  border-bottom: 2px solid white;
-}
-
-.numbers {
-  margin-top: 10px;
-}
-
-.numbers button {
-  width: 36px;
-  height: 36px;
-  margin: 3px;
-  font-size: 16px;
-}
-</style>
-</head>
-
-<body>
-
-<h1>Sudoku</h1>
-
-<div class="controls">
-  <select id="difficulty">
-    <option value="easy">Easy</option>
-    <option value="medium">Medium</option>
-    <option value="hard">Hard</option>
-  </select>
-  <button onclick="newGame()">New Game</button>
-</div>
-
-<div id="timer">Time: 00:00</div>
-
-<div id="sudoku"></div>
-
-<div class="numbers">
-  <button onclick="setNumber(1)">1</button>
-  <button onclick="setNumber(2)">2</button>
-  <button onclick="setNumber(3)">3</button>
-  <button onclick="setNumber(4)">4</button>
-  <button onclick="setNumber(5)">5</button>
-  <button onclick="setNumber(6)">6</button>
-  <button onclick="setNumber(7)">7</button>
-  <button onclick="setNumber(8)">8</button>
-  <button onclick="setNumber(9)">9</button>
-  <button onclick="setNumber('')">Clear</button>
-</div>
-
-<script>
-const puzzles = {
-  easy: [
-    [5,3,'','',7,'','','',''],
-    [6,'','',1,9,5,'','',''],
-    ['','9',8,'','','','',6,''],
-    [8,'','','',6,'','','',3],
-    [4,'','',8,'',3,'','',1],
-    [7,'','','',2,'','','',6],
-    ['','6','','','','',2,8,''],
-    ['','','',4,1,9,'','',5],
-    ['','','','',8,'','',7,9]
-  ]
-};
-
-let selectedCell = null;
-let seconds = 0;
-let timerInterval;
-
-function startTimer() {
-  clearInterval(timerInterval);
-  seconds = 0;
-  timerInterval = setInterval(() => {
-    seconds++;
-    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const s = String(seconds % 60).padStart(2, '0');
-    document.getElementById("timer").textContent = `Time: ${m}:${s}`;
-  }, 1000);
-}
-
-function newGame() {
-  const board = puzzles.easy;
-  const sudoku = document.getElementById("sudoku");
-  sudoku.innerHTML = '';
-  selectedCell = null;
-
-  board.flat().forEach(value => {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-
-    if (value !== '') {
-      cell.textContent = value;
-      cell.classList.add("fixed");
-    } else {
-      const input = document.createElement("input");
-      input.maxLength = 1;
-      input.onclick = () => selectedCell = input;
-      input.oninput = () => {
-        if (!/^[1-9]$/.test(input.value)) input.value = '';
-      };
-      cell.appendChild(input);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Age Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #4f46e5;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #4338ca;
+    }
+    .result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Age Calculator</h1>
+    <input type="date" id="dob" />
+    <button onclick="calculateAge()">Calculate Age</button>
+    <div class="result" id="result"></div>
+  </div>
 
-    sudoku.appendChild(cell);
-  });
+  <script>
+    function calculateAge() {
+      const dobInput = document.getElementById('dob').value;
+      if (!dobInput) {
+        document.getElementById('result').innerText = 'Please select your date of birth';
+        return;
+      }
 
-  startTimer();
-}
+      const dob = new Date(dobInput);
+      const today = new Date();
 
-function setNumber(num) {
-  if (selectedCell) {
-    selectedCell.value = num;
-  }
-}
+      let age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
 
-newGame();
-</script>
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
 
+      document.getElementById('result').innerText = `Your age is ${age} years old`;
+    }
+  </script>
 </body>
 </html>
