@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ultimate Sudoku — Zero Setup</title>
+<style>
+body{margin:0;font-family:system-ui,Arial;background:linear-gradient(135deg,#6366f1,#9333ea);display:flex;justify-content:center;align-items:center;min-height:100vh;color:#111}
+.container{background:#fff;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.3);padding:16px;width:min(380px,95vw)}
+h1{text-align:center;margin:6px 0;color:#4f46e5}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:6px}
+#timer{font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(9,1fr);gap:0}
+.cell{border:1px solid #bbb;aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.cell input{width:100%;height:100%;border:0;text-align:center;font-size:18px;background:#f9fafb}
+.cell input:focus{background:#e0e7ff;outline:none}
+.r{border-right:3px solid #111}.b{border-bottom:3px solid #111}
+.fixed input{background:#dbeafe;font-weight:700}
+.error input{background:#fecaca}
+.note{font-size:10px;color:#555}
+.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+button{border:0;border-radius:10px;padding:8px;font-size:13px;color:#fff;cursor:pointer}
+.easy{background:#3b82f6}.hard{background:#8b5cf6}.solve{background:#22c55e}.reset{background:#ef4444}.undo{background:#f59e0b}.notes{background:#14b8a6}
+.dark{background:#020617;color:#e5e7eb}
+.dark .container{background:#020617;border:1px solid #1e293b}
+.dark .cell input{background:#1e293b;color:#fff}
+.dark .fixed input{background:#1e40af}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 14px;border-radius:12px;display:none;font-weight:600}
+.record{text-align:center;font-size:12px;margin-top:4px}
+</style>
+<link rel="manifest" id="pwa-manifest">
+<meta name="theme-color" content="#4f46e5" />
+<script>
+// ---- PWA MANIFEST + ICON (no extra files) ----
+const manifest = {
+  name: "Ultimate Sudoku",
+  short_name: "Sudoku",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#4f46e5",
+  theme_color: "#4f46e5",
+  icons: [{
+    src: "data:image/svg+xml;base64," + btoa(`<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#6366f1'/><stop offset='100%' stop-color='#9333ea'/></linearGradient></defs><rect width='512' height='512' rx='96' fill='url(#g)'/><g fill='white' font-family='Arial' font-weight='700' font-size='96'><text x='256' y='160' text-anchor='middle'>SUDOKU</text><g font-size='88'><text x='140' y='280'>5</text><text x='240' y='280'>3</text><text x='340' y='280'>9</text><text x='140' y='380'>1</text><text x='240' y='380'>7</text><text x='340' y='380'>4</text></g></g></svg>`),
+    sizes: "512x512",
+    type: "image/svg+xml"
+  }]
+};
+const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(blob));
+
+// ---- SERVICE WORKER (offline, no file) ----
+if ('serviceWorker' in navigator) {
+  const swCode = `self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open('sudoku').then(c=>c.addAll(['./'])))});
+  self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})`;
+  const swBlob = new Blob([swCode], { type: 'text/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob));
+}
+</script>
+</head>
+<body>
+<div class="container">
+<h1>Ultimate Sudoku</h1>
+<div class="top"><span id="timer">⏱️ 00:00</span><span onclick="toggleDark()" style="cursor:pointer">🌙</span></div>
+<div id="board" class="grid"></div>
+<div class="buttons">
+<button class="easy" onclick="start('easy')">Easy</button>
+<button class="hard" onclick="start('hard')">Hard</button>
+<button class="undo" onclick="undo()">Undo</button>
+<button class="notes" onclick="toggleNotes()">Notes</button>
+<button class="solve" onclick="solveSudoku()">Solve</button>
+<button class="reset" onclick="start('easy')">Reset</button>
+</div>
+<div class="record">🏆 Best: <span id="best">--:--</span></div>
+</div>
+<div id="toast">🎉 Puzzle Solved!</div>
+<script>
+const board=document.getElementById('board');let grid=[],solution=[],startTime,timer,history=[],noteMode=false;
+const beep=(f=700)=>{const a=new(AudioContext||webkitAudioContext)();const o=a.createOscillator();o.frequency.value=f;o.connect(a.destination);o.start();setTimeout(()=>o.stop(),60)};
+function startTimer(){startTime=Date.now();clearInterval(timer);timer=setInterval(()=>{const t=Math.floor((Date.now()-startTime)/1000);document.getElementById('timer').textContent=`⏱️ ${String(t/60|0).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`},1000)}
+function toggleDark(){document.body.classList.toggle('dark');localStorage.dark=document.body.classList.contains('dark')}
+function create(){board.innerHTML='';for(let i=0;i<81;i++){const c=document.createElement('div');c.className='cell';if(i%9==2||i%9==5)c.classList.add('r');if((i/9|0)==2||(i/9|0)==5)c.classList.add('b');const inp=document.createElement('input');inp.oninput=()=>input(i,inp);c.appendChild(inp);board.appendChild(c)}}
+function input(i,inp){save();beep();if(noteMode){inp.value=inp.value.replace(/[^1-9]/g,'');inp.classList.add('note');return}inp.value=inp.value.replace(/[^1-9]/g,'');grid[i/9|0][i%9]=+inp.value||0;validate();checkWin()}
+function save(){history.push(JSON.stringify(grid))}
+function undo(){if(history.length){grid=JSON.parse(history.pop());render()}}
+function render(){[...board.children].forEach((c,i)=>{const v=grid[i/9|0][i%9];c.classList.remove('error');c.firstChild.value=v||''})}
+function valid(r,c,n){for(let i=0;i<9;i++)if(grid[r][i]==n||grid[i][c]==n)return false;const sr=r/3|0*3,sc=c/3|0*3;for(let i=sr;i<sr+3;i++)for(let j=sc;j<sc+3;j++)if(grid[i][j]==n)return false;return true}
+function solve(g){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!g[r][c]){for(let n=1;n<=9;n++)if(valid(r,c,n)){g[r][c]=n;if(solve(g))return true;g[r][c]=0}return false}return true}
+function solveSudoku(){grid=solution.map(r=>r.slice());render();beep(1200)}
+function validate(){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(grid[r][c]&&!valid(r,c,grid[r][c]))board.children[r*9+c].classList.add('error')}
+function checkWin(){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(grid[r][c]!=solution[r][c])return;clearInterval(timer);document.getElementById('toast').style.display='block';beep(1400);setTimeout(()=>document.getElementById('toast').style.display='none',2000);saveBest()}
+function saveBest(){const t=Date.now()-startTime;const b=+localStorage.best||1e18;if(t<b){localStorage.best=t;showBest()}}
+function showBest(){const b=+localStorage.best;if(!b)return;document.getElementById('best').textContent=`${String(b/60000|0).padStart(2,'0')}:${String(b/1000%60|0).padStart(2,'0')}`}
+function toggleNotes(){noteMode=!noteMode}
+function start(level){history=[];grid=Array.from({length:9},()=>Array(9).fill(0));solve(grid);solution=grid.map(r=>r.slice());let remove=level=='easy'?35:55;while(remove--)grid[Math.random()*9|0][Math.random()*9|0]=0;render();[...board.children].forEach((c,i)=>{if(grid[i/9|0][i%9])c.classList.add('fixed');else c.classList.remove('fixed')});startTimer()}
+create();if(localStorage.dark=='true')toggleDark();showBest();start('easy');
+</script>
+</body>
+</html>
