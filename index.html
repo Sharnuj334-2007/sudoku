@@ -2,117 +2,122 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sudoku App</title>
-
-</head>
-
-<body>
-<h1>Sudoku</h1>
-<div id="board"></div>
-<button onclick="newGame()">New Game</button>
+<title>Sudoku</title>
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f0f0f;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
 
-h1 {
-    margin: 20px 0;
-}
+    h1 {
+        margin-bottom: 20px;
+    }
 
-#board {
-    display: grid;
-    grid-template-columns: repeat(9, 45px);
-    grid-template-rows: repeat(9, 45px);
-    border: 3px solid #fff;
-}
-.cell:focus {
-    background: #2e7d32;
-}
+    #board {
+        display: grid;
+        grid-template-columns: repeat(9, 45px);
+        grid-template-rows: repeat(9, 45px);
+        border: 3px solid white;
+    }
 
-.cell.error {
-    background: #8b0000;
-}
+    .cell {
+        width: 45px;
+        height: 45px;
+        border: 1px solid #555;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        background: #222;
+    }
 
-.cell.fixed {
-    background: #333;
-    font-weight: bold;
-}
+    .cell:nth-child(3n) {
+        border-right: 2px solid white;
+    }
 
-/* Vertical thick lines */
-.cell:nth-child(3n) {
-    border-right: 3px solid #fff;
-}
+    .row-border {
+        border-bottom: 2px solid white;
+    }
 
-/* Horizontal thick lines */
-.cell:nth-child(n+19):nth-child(-n+27),
-.cell:nth-child(n+46):nth-child(-n+54) {
-    border-bottom: 3px solid #fff;
-}
+    .fixed {
+        background: #333;
+        font-weight: bold;
+    }
 
-button {
-    margin: 20px;
-    padding: 10px 25px;
-    font-size: 16px;
-    border: none;
-    background: #4caf50;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 5px;
-}
+    button {
+        margin-top: 20px;
+        padding: 10px 25px;
+        font-size: 16px;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #43a047;
+    }
 </style>
-<script>
-const boardElement = document.getElementById("board");
-const newGameBtn = document.getElementById("newGame");
+</head>
+<body>
 
+<h1>Sudoku</h1>
+
+<div id="board"></div>
+
+<button onclick="newGame()">New Game</button>
+
+<script>
 const puzzle = [
- [5,3,0,0,7,0,0,0,0],
- [6,0,0,1,9,5,0,0,0],
- [0,9,8,0,0,0,0,6,0],
- [8,0,0,0,6,0,0,0,3],
- [4,0,0,8,0,3,0,0,1],
- [7,0,0,0,2,0,0,0,6],
- [0,6,0,0,0,0,2,8,0],
- [0,0,0,4,1,9,0,0,5],
- [0,0,0,0,8,0,0,7,9]
+    [5,3,0,0,7,0,0,0,0],
+    [6,0,0,1,9,5,0,0,0],
+    [0,9,8,0,0,0,0,6,0],
+    [8,0,0,0,6,0,0,0,3],
+    [4,0,0,8,0,3,0,0,1],
+    [7,0,0,0,2,0,0,0,6],
+    [0,6,0,0,0,0,2,8,0],
+    [0,0,0,4,1,9,0,0,5],
+    [0,0,0,0,8,0,0,7,9]
 ];
 
-function createBoard() {
-    boardElement.innerHTML = "";
-    puzzle.forEach((row, r) => {
-        row.forEach((num, c) => {
-            const cell = document.createElement("input");
-            cell.type = "text";
-            cell.maxLength = 1;
+const board = document.getElementById("board");
+
+function drawBoard() {
+    board.innerHTML = "";
+
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            const cell = document.createElement("div");
             cell.classList.add("cell");
 
-            if (num !== 0) {
-                cell.value = num;
-                cell.disabled = true;
+            if ((r + 1) % 3 === 0 && r !== 8) {
+                cell.classList.add("row-border");
+            }
+
+            if (puzzle[r][c] !== 0) {
+                cell.textContent = puzzle[r][c];
                 cell.classList.add("fixed");
             }
 
-            cell.addEventListener("input", () => {
-                if (!/^[1-9]$/.test(cell.value)) {
-                    cell.value = "";
-                }
-            });
-
-            boardElement.appendChild(cell);
-        });
-    });
+            board.appendChild(cell);
+        }
+    }
 }
 
-newGameBtn.onclick = createBoard;
-createBoard();
+function newGame() {
+    drawBoard();
+}
+
+drawBoard();
 </script>
+
 </body>
 </html>
-
-
-
