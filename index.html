@@ -68,34 +68,31 @@ button {
 </style>
 <script>
 const boardElement = document.getElementById("board");
+const newGameBtn = document.getElementById("newGame");
 
-const puzzles = [
-    [
-        [5,3,0,0,7,0,0,0,0],
-        [6,0,0,1,9,5,0,0,0],
-        [0,9,8,0,0,0,0,6,0],
-        [8,0,0,0,6,0,0,0,3],
-        [4,0,0,8,0,3,0,0,1],
-        [7,0,0,0,2,0,0,0,6],
-        [0,6,0,0,0,0,2,8,0],
-        [0,0,0,4,1,9,0,0,5],
-        [0,0,0,0,8,0,0,7,9]
-    ]
+const puzzle = [
+ [5,3,0,0,7,0,0,0,0],
+ [6,0,0,1,9,5,0,0,0],
+ [0,9,8,0,0,0,0,6,0],
+ [8,0,0,0,6,0,0,0,3],
+ [4,0,0,8,0,3,0,0,1],
+ [7,0,0,0,2,0,0,0,6],
+ [0,6,0,0,0,0,2,8,0],
+ [0,0,0,4,1,9,0,0,5],
+ [0,0,0,0,8,0,0,7,9]
 ];
 
-function newGame() {
+function createBoard() {
     boardElement.innerHTML = "";
-    const puzzle = puzzles[0];
-
-    for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
+    puzzle.forEach((row, r) => {
+        row.forEach((num, c) => {
             const cell = document.createElement("input");
             cell.type = "text";
             cell.maxLength = 1;
             cell.classList.add("cell");
 
-            if (puzzle[r][c] !== 0) {
-                cell.value = puzzle[r][c];
+            if (num !== 0) {
+                cell.value = num;
                 cell.disabled = true;
                 cell.classList.add("fixed");
             }
@@ -107,13 +104,15 @@ function newGame() {
             });
 
             boardElement.appendChild(cell);
-        }
-    }
+        });
+    });
 }
 
-newGame();
+newGameBtn.onclick = createBoard;
+createBoard();
 </script>
 </body>
 </html>
+
 
 
