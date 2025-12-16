@@ -31,16 +31,12 @@ h1 {
     grid-template-rows: repeat(9, 45px);
     border: 3px solid #fff;
 }
+.cell:focus {
+    background: #2e7d32;
+}
 
-.cell {
-    width: 45px;
-    height: 45px;
-    text-align: center;
-    font-size: 18px;
-    border: 1px solid #555;
-    outline: none;
-    background: #222;
-    color: #fff;
+.cell.error {
+    background: #8b0000;
 }
 
 .cell.fixed {
@@ -119,4 +115,5 @@ newGame();
 </script>
 </body>
 </html>
+
 
